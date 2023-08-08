@@ -192,7 +192,7 @@ treatment_status_elec <- v1 + v2 + plot_layout(guides = "collect", byrow = F, wi
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
+#ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -344,7 +344,7 @@ treatment_status_industry <- v1 + v2 + plot_layout(guides = "collect", byrow = F
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
+#ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -501,7 +501,7 @@ treatment_status_transport <- v1 + v2 + plot_layout(guides = "collect", byrow = 
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
+#ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -633,7 +633,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_buildings_ac6_output.RDS")
+#saveRDS(out, file = ".\\gsynth_buildings_ac6_output.RDS")
 
 ```
 
@@ -668,7 +668,7 @@ treatment_status_buildings <- v1 + v2 + plot_layout(guides = "collect", byrow = 
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
+#ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
 
 ```
 

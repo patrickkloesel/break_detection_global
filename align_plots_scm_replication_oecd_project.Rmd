@@ -1,9 +1,11 @@
 ---
-title: "scm_align_plots"
-author: "Laura Menicacci"
+title: "SCM Replications OECD Project - Aligning Plots"
+output:
+  html_document: default
 date: "2023-08-04"
-output: html_document
 ---
+
+Author: Laura Menicacci (laurame@pik-potsdam.de)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
