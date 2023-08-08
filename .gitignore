@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.RData
+*.rdx
+*.rdb
+scm_replication_oecd_project_25052023_new_cache/html/__packages

@@ -30,7 +30,7 @@ source(".\\gsynth_edited.R")
 RICORDA DI CHIEDERE SE LA LEGEND VA BENE PER OGNI PLOT
 ```{r elec-ac1-patchwork, echo=FALSE, include=FALSE}
 # Load model output
-elec_ac1 <- readRDS(".\\gsynth_electricity_ac1_output.RDS")
+elec_ac1 <- readRDS(".\\model_outputs\\gsynth_electricity_ac1_output.RDS")
 
 p1 <- plot(elec_ac1, type = "gap", id = "United Kingdom", main = "")
 
@@ -114,7 +114,7 @@ ggsave(".\\figures\\combined_elec_ac1.png", plot = combined_elec_ac1, device = "
 # Electricity AC6
 ```{r elec-ac1-patchwork, echo=FALSE, include=FALSE}
 # Load model output
-elec_ac6 <- readRDS(".\\gsynth_electricity_ac6_output.RDS")
+elec_ac6 <- readRDS(".\\model_outputs\\gsynth_electricity_ac6_output.RDS")
 
 # Combine plots
 p1 <- plot(elec_ac6, type = "gap", id = "Brazil", main = "")
@@ -160,7 +160,7 @@ ggsave(".\\figures\\combined_elec_ac6.png", plot = combined_elec_ac6, device = "
 # Industry AC1 
 ```{r industry-ac1, echo=FALSE, include=FALSE}
 # Load model output
-ind_ac1 <- readRDS(".\\gsynth_industry_ac1_output.RDS")
+ind_ac1 <- readRDS(".\\model_outputs\\gsynth_industry_ac1_output.RDS")
 
 p1 <- plot(ind_ac1, type = "gap", id = "Bulgaria", main = "")
 p2 <- plot(ind_ac1, type = "ct", id = "Bulgaria", main = "") + geom_vline(aes(xintercept=2009), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2009
@@ -268,7 +268,7 @@ ggsave(".\\figures\\combined_industry_ac1.png", plot = combined_industry_ac1, de
 ```{r industry-ac6, echo=FALSE, include=FALSE}
 
 # Load model output
-ind_ac6 <- readRDS(".\\gsynth_industry_ac6_output.RDS")
+ind_ac6 <- readRDS(".\\model_outputs\\gsynth_industry_ac6_output.RDS")
 
 p1 <- plot(ind_ac6, type = "gap", id = "China", main = "")
 p2 <- plot(ind_ac6, type = "ct", id = "China", main = "") + geom_vline(aes(xintercept=2018), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2018
@@ -323,7 +323,7 @@ ggsave(".\\figures\\combined_industry_ac6.png", plot = combined_industry_ac6, de
 
 ```{r transp-ac1, echo=FALSE, include=FALSE}
 # Load model output
-transp_ac1 <- readRDS(".\\gsynth_transport_ac1_output.RDS")
+transp_ac1 <- readRDS(".\\model_outputs\\gsynth_transport_ac1_output.RDS")
 
 p1 <- plot(transp_ac1, type = "gap", id = "Austria", main = "")
 p2 <- plot(transp_ac1, type = "ct", id = "Austria", main = "")
@@ -469,10 +469,3 @@ combined_transport_ac1
 ggsave(".\\figures\\combined_transport_ac1.png", plot = combined_transport_ac1, device = "png", width = 20, height = 25)
 
 ```
-
-left to do
-- transport ac6
-- buildings
-- metti su overleaf
-- sistema repo
-- double check che è tutto giusto
