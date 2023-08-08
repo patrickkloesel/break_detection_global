@@ -24,9 +24,10 @@ library(ggplot2)
 library(tidyverse)
 library(gsynth)
 library(panelView)
+library(patchwork)
 
 # Load gsynth function with custom labels
-source(".\\gsynth_edited.R")
+source(".\\plot_cf_gsynth_custom.R")
 ```
 
 ```{r data, echo=FALSE}
@@ -76,11 +77,15 @@ data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2009, 1, dat
 #data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2014, 1, data$treated)
 
 # Check Treatments
-panelview(electricity_heat_co2 ~ treated, data = data,  
+v1 <- panelview(electricity_heat_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          cex.legend = 8, 
+          background = "white") + ggtitle("Country Sample: Annex I") +
+  theme(plot.title = element_text(size = 12))
+
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -95,7 +100,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_electricity_ac1_output.RDS")
+#saveRDS(out, file = ".\\gsynth_electricity_ac1_output.RDS")
 ```
 
 ```{r,  figures-electricity-ac1, fig.show="hold", out.width="50%"}
@@ -138,11 +143,14 @@ data$treated <- ifelse(data$country == "Brazil" & data$year >= 2016, 1, data$tre
 data$treated <- ifelse(data$country == "Colombia" & data$year >= 2011, 1, data$treated)
 
 # Check Treatments
-panelview(log_electricity_heat_co2 ~ treated, data = data,  
+v2 <- panelview(log_electricity_heat_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          cex.legend = 8, 
+          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+  theme(plot.title = element_text(size = 12))
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -157,10 +165,9 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_electricity_ac6_output.RDS")
+#saveRDS(out, file = ".\\gsynth_electricity_ac6_output.RDS")
 
 ```
-
 
 ```{r,  figures-electricity-ac6, fig.show="hold", out.width="50%"}
 
@@ -174,6 +181,16 @@ plot(out, type = "ct", id = "Colombia", main = "Colombia 2011 (E)") #+ geom_vlin
 
 ```
 
+```{r combine-elec, echo=FALSE, include=FALSE}
+
+treatment_status_elec <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Electricity',
+                  theme = theme(plot.title = element_text(size = 16), 
+                                legend.position = "bottom", 
+                                legend.text=element_text(size=12)))
+
+#ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
+
+```
 
 ## Industry Sector
 
@@ -199,11 +216,13 @@ data$treated <- ifelse(data$country == "Italy" & data$year >= 2013, 1, data$trea
 data$treated <- ifelse(data$country == "Romania" & data$year >= 2009, 1, data$treated)
 
 # Check Treatments
-panelview(log_industry_co2 ~ treated, data = data,  
+v1 <- panelview(log_industry_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -219,7 +238,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_industry_ac1_output.RDS")
+#saveRDS(out, file = ".\\gsynth_industry_ac1_output.RDS")
 
 ```
 
@@ -272,11 +291,13 @@ data$treated <- ifelse(data$country == "Saudi Arabia" & data$year >= 2016, 1, da
 #data$treated <- ifelse(data$country == "South Korea" & data$year >= 2004, 1, data$treated)
 
 # Check Treatments
-panelview(log_industry_co2 ~ treated, data = data,  
+v2 <- panelview(log_industry_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 system.time(
   out <- gsynth(log_industry_co2 ~ treated +
@@ -291,7 +312,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_industry_ac6_output.RDS")
+#saveRDS(out, file = ".\\gsynth_industry_ac6_output.RDS")
 
 ```
 
@@ -305,6 +326,17 @@ plot(out, type = "ct", id = "Indonesia", main = "Indonesia 2013 (I)")
 #
 plot(out, type = "gap", id = "Saudi Arabia", main = "Saudi Arabia 2016 (I)")
 plot(out, type = "ct", id = "Saudi Arabia", main = "Saudi Arabia 2016 (I)")
+
+```
+
+```{r combine-industry, echo=FALSE, include=FALSE}
+
+treatment_status_industry <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Industry',
+                  theme = theme(plot.title = element_text(size = 16), 
+                                legend.position = "bottom", 
+                                legend.text=element_text(size=12)))
+
+#ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -335,11 +367,13 @@ data$treated <- ifelse(data$country == "Sweden" & data$year >= 2016, 1, data$tre
 data$treated <- ifelse(data$country == "United States" & data$year >= 2008, 1, data$treated)
 
 # Check Treatments
-panelview(log_transport_co2 ~ treated, data = data,  
+v1 <- panelview(log_transport_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -354,7 +388,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_transport_ac1_output.RDS")
+#saveRDS(out, file = ".\\gsynth_transport_ac1_output.RDS")
 
 ```
 
@@ -410,11 +444,13 @@ data$treated <- ifelse(data$country == "Mexico" & data$year >= 2020, 1, data$tre
 data$treated <- ifelse(data$country == "South Korea" & data$year >= 2008, 1, data$treated)
 
 # Check Treatments
-panelview(log_transport_co2 ~ treated, data = data,  
+v2 <- panelview(log_transport_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 system.time(
   out <- gsynth(log_transport_co2 ~ treated 
@@ -428,7 +464,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_transport_ac6_output.RDS")
+#saveRDS(out, file = ".\\gsynth_transport_ac6_output.RDS")
 
 ```
 
@@ -436,13 +472,24 @@ saveRDS(out, file = ".\\gsynth_transport_ac6_output.RDS")
 ```{r,  figures-transport-ac6, fig.show="hold", out.width="50%"}
 # Plot Individual Treatment Effects (Difference Factual and Counterfactual)
 plot(out, type = "gap", id = "Colombia", main = "Colombia 2008 (T)")
-plot(out, type = "ct", id = "Colombia", main = "Colombia 2008 (T)") + geom_vline(aes(xintercept=2002), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2002
+plot(out, type = "ct", id = "Colombia", main = "Colombia 2008 (T)") #+ geom_vline(aes(xintercept=2002), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2002
 
 plot(out, type = "gap", id = "Mexico", main = "Mexico 2020 (T)")
 plot(out, type = "ct", id = "Mexico", main = "Mexico 2020 (T)")
 
 plot(out, type = "gap", id = "South Korea", main = "South Korea 2008 (T)")
 plot(out, type = "ct", id = "South Korea", main = "South Korea 2008 (T)")
+
+```
+
+```{r combine-transport, echo=FALSE, include=FALSE}
+
+treatment_status_transport <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Transport',
+                  theme = theme(plot.title = element_text(size = 16), 
+                                legend.position = "bottom", 
+                                legend.text=element_text(size=12)))
+
+#ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -473,11 +520,13 @@ data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2011, 1,
 #data$treated <- ifelse(data$country == "Sweden" & data$year >= 2004, 1, data$treated)
 
 # Check Treatments
-panelview(log_buildings_co2 ~ treated, data = data,  
+v1 <- panelview(log_buildings_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -492,7 +541,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-saveRDS(out, file = ".\\gsynth_buildings_ac1_output.RDS")
+#saveRDS(out, file = ".\\gsynth_buildings_ac1_output.RDS")
 
 ```
 
@@ -509,10 +558,10 @@ plot(out, type = "gap", id = "Denmark", main = "Denmark 2020 (B)")
 plot(out, type = "ct", id = "Denmark", main = "Denmark 2020 (B)")
 
 plot(out, type = "gap", id = "Greece", main = "Greece 2012 (B)")
-plot(out, type = "ct", id = "Greece", main = "Greece 2012 (B)") + geom_vline(aes(xintercept=2013), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2013
+plot(out, type = "ct", id = "Greece", main = "Greece 2012 (B)") #+ geom_vline(aes(xintercept=2013), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2013
 
 plot(out, type = "gap", id = "Ireland", main = "Ireland 2015 (B)")
-plot(out, type = "ct", id = "Ireland", main = "Ireland 2015 (B)") + geom_vline(aes(xintercept=2020), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2020
+plot(out, type = "ct", id = "Ireland", main = "Ireland 2015 (B)") #+ geom_vline(aes(xintercept=2020), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2020
 
 plot(out, type = "gap", id = "New Zealand", main = "New Zealand 2018 (B)")
 plot(out, type = "ct", id = "New Zealand", main = "New Zealand 2018 (B)")
@@ -524,7 +573,7 @@ plot(out, type = "gap", id = "Poland", main = "Poland 2019 (B)")
 plot(out, type = "ct", id = "Poland", main = "Poland 2019 (B)")
 #
 plot(out, type = "gap", id = "Slovak Republic", main = "Slovak Republic 2011 (B)")
-plot(out, type = "ct", id = "Slovak Republic", main = "Slovak Republic 2011 (B)")  + geom_vline(aes(xintercept=2001), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2003), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2015), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2001 - 2003 - 2015
+plot(out, type = "ct", id = "Slovak Republic", main = "Slovak Republic 2011 (B)")  #+ geom_vline(aes(xintercept=2001), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2003), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2015), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2001 - 2003 - 2015
 
 ```
 
@@ -532,7 +581,6 @@ plot(out, type = "ct", id = "Slovak Republic", main = "Slovak Republic 2011 (B)"
 
 ```{r build-ac6-mod, cache=TRUE}
 # AC6
-
 data <- ac6
 
 # Treatments
@@ -549,11 +597,13 @@ data$treated <- ifelse(data$country == "Turkey" & data$year >= 2013, 1, data$tre
 
 
 # Check Treatments
-panelview(log_buildings_co2 ~ treated, data = data,  
+v2 <- panelview(log_buildings_co2 ~ treated, data = data,  
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4) 
+          cex.axis.y = 4, 
+          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+  theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
 system.time(
@@ -595,6 +645,16 @@ plot(out, type = "ct", id = "Turkey", main = "Turkey 2013 (B)")
 ```
 
 
+```{r combine-buildings, echo=FALSE, include=FALSE}
+
+treatment_status_buildings <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Buildings',
+                  theme = theme(plot.title = element_text(size = 16), 
+                                legend.position = "bottom", 
+                                legend.text=element_text(size=12)))
+
+#ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
+
+```
 
 
 

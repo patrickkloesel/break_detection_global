@@ -22,18 +22,17 @@ data <- read_rds(".\\ghg_co2_manual_edgar_final_ets_dummies_updated_fixed.RDS")
 
 
 # Load gsynth function with custom labels
-source(".\\gsynth_edited.R")
+source(".\\plot_cf_gsynth_custom.R")
 ```
 
 # Electricity AC1
 
-RICORDA DI CHIEDERE SE LA LEGEND VA BENE PER OGNI PLOT
 ```{r elec-ac1-patchwork, echo=FALSE, include=FALSE}
 # Load model output
 elec_ac1 <- readRDS(".\\model_outputs\\gsynth_electricity_ac1_output.RDS")
 
+# Combine plots
 p1 <- plot(elec_ac1, type = "gap", id = "United Kingdom", main = "")
-
 p2 <- plot(elec_ac1, type = "ct", id = "United Kingdom", main = "") + geom_vline(aes(xintercept=2016), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2016
 
 combined_uk <- p1 + p2 + plot_layout(guides = "collect") + 
@@ -41,7 +40,7 @@ combined_uk <- p1 + p2 + plot_layout(guides = "collect") +
                   theme = theme(plot.title = element_text(size = 18))) & 
   theme(text = element_text('sans')) & 
   theme(plot.title = element_text(face = "bold")) & 
-  theme(plot.title.position = "panel")&
+  theme(plot.title.position = "panel") &
   theme(legend.position = "bottom")
 
 #### 
@@ -107,27 +106,26 @@ combined_elec_ac1 <- ggarrange(combined_uk,
 
 combined_elec_ac1
 
-ggsave(".\\figures\\combined_elec_ac1.png", plot = combined_elec_ac1, device = "png", width = 15, height = 20)
+ggsave(".\\figures\\combined_elec_ac1.jpg", plot = combined_elec_ac1, device = "jpg", width = 15, height = 25)
 
 ```
 
 # Electricity AC6
-```{r elec-ac1-patchwork, echo=FALSE, include=FALSE}
+```{r elec-ac6-patchwork, echo=FALSE, include=FALSE}
 # Load model output
 elec_ac6 <- readRDS(".\\model_outputs\\gsynth_electricity_ac6_output.RDS")
 
 # Combine plots
-p1 <- plot(elec_ac6, type = "gap", id = "Brazil", main = "")
+p1 <- plot(elec_ac6, type = "gap", id = "Brazil", main = "", legendOff = T)
 
-p2 <- plot(elec_ac6, type = "ct", id = "Brazil", main = "")
+p2 <- plot(elec_ac6, type = "ct", id = "Brazil", main = "", legendOff = T)
 
 combined_brazil <- p1 + p2 + plot_layout(guides = "collect") + 
   plot_annotation(title = 'Brazil 2016 (E)',
                   theme = theme(plot.title = element_text(size = 18))) & 
   theme(text = element_text('sans')) & 
   theme(plot.title = element_text(face = "bold")) & 
-  theme(plot.title.position = "panel") &
-  theme(legend.position = "bottom")
+  theme(plot.title.position = "panel")
 
 ####
 p1 <- plot(elec_ac6, type = "gap", id = "Colombia", main = "", legendOff = T)
@@ -144,7 +142,7 @@ combined_colombia <- p1 + p2 + plot_layout(guides = "collect") +
 
 ```
 
-```{r elec-ac6-aligned, echo=FALSE, fig.width=15, fig.height=20}
+```{r elec-ac6-aligned, echo=FALSE, fig.width=10, fig.height=10}
 # Aligned plots
  
 combined_elec_ac6 <- ggarrange(combined_brazil,
@@ -154,7 +152,7 @@ combined_elec_ac6 <- ggarrange(combined_brazil,
 
 combined_elec_ac6
 
-ggsave(".\\figures\\combined_elec_ac6.png", plot = combined_elec_ac6, device = "png", width = 15, height = 15)
+ggsave(".\\figures\\combined_elec_ac6.jpg", plot = combined_elec_ac6, device = "jpg", width = 15, height = 10)
 ```
 
 # Industry AC1 
@@ -162,6 +160,7 @@ ggsave(".\\figures\\combined_elec_ac6.png", plot = combined_elec_ac6, device = "
 # Load model output
 ind_ac1 <- readRDS(".\\model_outputs\\gsynth_industry_ac1_output.RDS")
 
+# Combine plots
 p1 <- plot(ind_ac1, type = "gap", id = "Bulgaria", main = "")
 p2 <- plot(ind_ac1, type = "ct", id = "Bulgaria", main = "") + geom_vline(aes(xintercept=2009), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2009
 
@@ -182,8 +181,7 @@ combined_canada <- p1 + p2 + plot_layout(guides = "collect") +
                   theme = theme(plot.title = element_text(size = 18))) & 
   theme(text = element_text('sans')) & 
   theme(plot.title = element_text(face = "bold")) & 
-  theme(plot.title.position = "panel") &
-  theme(legend.position = "bottom")
+  theme(plot.title.position = "panel")
 
 ####
 p1 <- plot(ind_ac1, type = "gap", id = "Czech Republic", main = "", legendOff = T)
@@ -260,26 +258,25 @@ combined_industry_ac1 <- ggarrange(combined_bulgaria,
 
 combined_industry_ac1
 
-ggsave(".\\figures\\combined_industry_ac1.png", plot = combined_industry_ac1, device = "png", width = 20, height = 20)
+ggsave(".\\figures\\combined_industry_ac1.jpg", plot = combined_industry_ac1, device = "jpg", width = 15, height = 25)
 ```
 
 
 # Industry AC6 
 ```{r industry-ac6, echo=FALSE, include=FALSE}
-
 # Load model output
 ind_ac6 <- readRDS(".\\model_outputs\\gsynth_industry_ac6_output.RDS")
 
-p1 <- plot(ind_ac6, type = "gap", id = "China", main = "")
-p2 <- plot(ind_ac6, type = "ct", id = "China", main = "") + geom_vline(aes(xintercept=2018), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2018
+# Combine plots
+p1 <- plot(ind_ac6, type = "gap", id = "China", main = "", legendOff = T)
+p2 <- plot(ind_ac6, type = "ct", id = "China", main = "", legendOff = T) + geom_vline(aes(xintercept=2018), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2018
 
 combined_china <- p1 + p2 + plot_layout(guides = "collect") + 
   plot_annotation(title = 'China 2016 (I)',
                   theme = theme(plot.title = element_text(size = 18))) & 
   theme(text = element_text('sans')) & 
   theme(plot.title = element_text(face = "bold")) & 
-  theme(plot.title.position = "panel") &
-  theme(legend.position = "bottom")
+  theme(plot.title.position = "panel")
 
 ####
 p1 <- plot(ind_ac6, type = "gap", id = "Indonesia", main = "", legendOff = T)
@@ -306,7 +303,7 @@ combined_saudiarabia <- p1 + p2 + plot_layout(guides = "collect") +
 ```
 
 ```{r industry-ac6-aligned, echo=FALSE, fig.height=20, fig.width=15}
-
+# Aligned plots
 combined_industry_ac6 <- ggarrange(combined_china,
           combined_indonesia,
           combined_saudiarabia,
@@ -315,7 +312,7 @@ combined_industry_ac6 <- ggarrange(combined_china,
 
 combined_industry_ac6
 
-ggsave(".\\figures\\combined_industry_ac6.png", plot = combined_industry_ac6, device = "png", width = 15, height = 15)
+ggsave(".\\figures\\combined_industry_ac6.jpg", plot = combined_industry_ac6, device = "jpg", width = 15, height = 15)
 
 ```
 
@@ -325,6 +322,7 @@ ggsave(".\\figures\\combined_industry_ac6.png", plot = combined_industry_ac6, de
 # Load model output
 transp_ac1 <- readRDS(".\\model_outputs\\gsynth_transport_ac1_output.RDS")
 
+# Combine plots
 p1 <- plot(transp_ac1, type = "gap", id = "Austria", main = "")
 p2 <- plot(transp_ac1, type = "ct", id = "Austria", main = "")
 
@@ -449,7 +447,7 @@ combined_usa <- p1 + p2 + plot_layout(guides = "collect") +
 ```
 
 ```{r transp-ac1-aligned, echo=FALSE, fig.height=25, fig.width=20}
-
+# Aligned plots
 combined_transport_ac1 <- ggarrange(combined_austria,
           combined_denmark,
           combined_germany,
@@ -461,11 +459,290 @@ combined_transport_ac1 <- ggarrange(combined_austria,
           combined_spain, 
           combined_sweden, 
           combined_usa,
-          nrow = 12,
+          nrow = 11,
           ncol = 1) 
 
 combined_transport_ac1
 
-ggsave(".\\figures\\combined_transport_ac1.png", plot = combined_transport_ac1, device = "png", width = 20, height = 25)
+ggsave(".\\figures\\combined_transport_ac1.jpg", plot = combined_transport_ac1, device = "jpg", width = 15, height = 30)
 
 ```
+
+# Transport AC6 
+
+```{r transp-ac6, echo=FALSE, include=FALSE}
+# Load model output
+transp_ac6 <- readRDS(".\\model_outputs\\gsynth_transport_ac6_output.RDS")
+
+# Combine plots
+p1 <- plot(transp_ac6, type = "gap", id = "Colombia", main = "", legendOff = T)
+p2 <- plot(transp_ac6, type = "ct", id = "Colombia", main = "", legendOff = T) + geom_vline(aes(xintercept=2002), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2002
+
+combined_colombia <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Colombia 2008 (T)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+p1 <- plot(transp_ac6, type = "gap", id = "Mexico", main = "", legendOff = T)
+p2 <- plot(transp_ac6, type = "ct", id = "Mexico", main = "", legendOff = T)
+
+combined_mexico <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Mexico 2020 (T)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+p1 <- plot(transp_ac6, type = "gap", id = "South Korea", main = "", legendOff = T)
+p2 <- plot(transp_ac6, type = "ct", id = "South Korea", main = "", legendOff = T)
+
+combined_southkorea <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'South Korea 2008 (T)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+```
+
+```{r transp-ac6-aligned, echo=FALSE, fig.height=25, fig.width=20}
+# Aligned plots
+combined_transport_ac6 <- ggarrange(combined_colombia,
+          combined_mexico,
+          combined_southkorea,
+          nrow = 3,
+          ncol = 1) 
+
+combined_transport_ac6
+
+ggsave(".\\figures\\combined_transport_ac6.jpg", plot = combined_transport_ac6, device = "jpg", width = 15, height = 15)
+
+
+```
+
+# Buildings AC1 
+
+```{r building-ac1, echo=FALSE, include=FALSE}
+
+# Load model output
+build_ac1 <- readRDS(".\\model_outputs\\gsynth_buildings_ac1_output.RDS")
+
+# Combine plots
+p1 <- plot(build_ac1, type = "gap", id = "Australia", main = "")
+p2 <- plot(build_ac1, type = "ct", id = "Australia", main = "")
+
+combined_australia <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Australia 2019 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel") &
+  theme(legend.position = "bottom")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Czech Republic", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Czech Republic", main = "", legendOff = T)
+
+combined_czechrepublic <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Czech Republic 2005 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Denmark", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Denmark", main = "", legendOff = T)
+
+combined_denmark <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Denmark 2020 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Greece", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Greece", main = "", legendOff = T) + geom_vline(aes(xintercept=2013), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2013
+
+combined_greece <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Greece 2012 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Ireland", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Ireland", main = "", legendOff = T) + geom_vline(aes(xintercept=2020), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2020
+
+combined_ireland <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Ireland 2015 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "New Zealand", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "New Zealand", main = "", legendOff = T)
+
+combined_nz <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'New Zealand 2018 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Norway", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Norway", main = "", legendOff = T)
+
+combined_norway <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Norway 2015 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Poland", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Poland", main = "", legendOff = T)
+
+combined_poland <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Poland 2019 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac1, type = "gap", id = "Slovak Republic", main = "", legendOff = T)
+p2 <- plot(build_ac1, type = "ct", id = "Slovak Republic", main = "", legendOff = T)  + geom_vline(aes(xintercept=2001), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2003), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2015), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2001 - 2003 - 2015
+
+combined_slovakrep <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Slovak Republic 2011 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+```
+
+
+```{r build-ac1-aligned, echo=FALSE, fig.height=30, fig.width=15}
+# Aligned plots
+combined_building_ac1 <- ggarrange(combined_australia,
+          combined_czechrepublic,
+          combined_denmark,
+          combined_greece,
+          combined_ireland,
+          combined_nz,
+          combined_norway,
+          combined_poland,
+          combined_slovakrep,
+          nrow = 9,
+          ncol = 1) 
+
+combined_building_ac1
+
+ggsave(".\\figures\\combined_building_ac1.jpg", plot = combined_building_ac1, device = "jpg", width = 15, height = 25)
+
+```
+
+
+# Buildings AC6
+
+```{r building-ac6, echo=FALSE, include=FALSE}
+# Load model output
+build_ac6 <- readRDS(".\\model_outputs\\gsynth_buildings_ac6_output.RDS")
+
+# Combine plots
+p1 <- plot(build_ac6, type = "gap", id = "Argentina", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "Argentina", main = "", legendOff = T)
+
+combined_arg <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Argentina 2017 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac6, type = "gap", id = "China", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "China", main = "", legendOff = T)
+
+combined_china <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'China 2018 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac6, type = "gap", id = "Colombia", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "Colombia", main = "", legendOff = T)
+
+combined_colombia <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Colombia 2013 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac6, type = "gap", id = "Peru", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "Peru", main = "", legendOff = T) + geom_vline(aes(xintercept=2003), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2003
+
+combined_peru <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Peru 2006 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac6, type = "gap", id = "South Africa", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "South Africa", main = "", legendOff = T) + geom_vline(aes(xintercept=2015), colour = "#AAAAAA70", size = 2, linetype = "solid") + geom_vline(aes(xintercept=2020), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2015 - 2020
+
+combined_southafrica <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'South Africa 2010 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+####
+p1 <- plot(build_ac6, type = "gap", id = "Turkey", main = "", legendOff = T)
+p2 <- plot(build_ac6, type = "ct", id = "Turkey", main = "", legendOff = T)
+
+combined_turkey <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'Turkey 2013 (B)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
+
+```
+
+```{r build-ac6-aligned, echo=FALSE, fig.height=25, fig.width=20}
+
+# Aligned plots
+combined_building_ac6 <- ggarrange(combined_arg,
+                                   combined_china,
+                                   combined_colombia,
+                                   combined_peru,
+                                   combined_southafrica,
+                                   combined_turkey,
+          nrow = 6,
+          ncol = 1) 
+
+combined_building_ac6
+
+ggsave(".\\figures\\combined_building_ac6.jpg", plot = combined_building_ac6, device = "jpg", width = 15, height = 20)
+
+
+```
+
