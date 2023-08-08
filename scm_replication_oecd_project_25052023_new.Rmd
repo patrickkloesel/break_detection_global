@@ -83,7 +83,9 @@ v1 <- panelview(electricity_heat_co2 ~ treated, data = data,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
           cex.legend = 8, 
-          background = "white") + ggtitle("Country Sample: Annex I") +
+          background = "white", 
+          xlab = "Year", 
+          ylab = "Country") + ggtitle("Country Sample: Annex I") +
   theme(plot.title = element_text(size = 12))
 
 
@@ -149,7 +151,9 @@ v2 <- panelview(log_electricity_heat_co2 ~ treated, data = data,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
           cex.legend = 8, 
-          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+          background = "white", 
+          xlab = "", 
+          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
   theme(plot.title = element_text(size = 12))
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -188,7 +192,7 @@ treatment_status_elec <- v1 + v2 + plot_layout(guides = "collect", byrow = F, wi
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
+ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -221,7 +225,9 @@ v1 <- panelview(log_industry_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Annex I") +
+          background = "white", 
+          xlab = "Year", 
+          ylab = "Country") + ggtitle("Country Sample: Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -296,7 +302,9 @@ v2 <- panelview(log_industry_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+          background = "white", 
+          xlab = "", 
+          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 system.time(
@@ -336,7 +344,7 @@ treatment_status_industry <- v1 + v2 + plot_layout(guides = "collect", byrow = F
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
+ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -372,7 +380,9 @@ v1 <- panelview(log_transport_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Annex I") +
+          background = "white", 
+          xlab = "Year", 
+          ylab = "Country") + ggtitle("Country Sample: Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -449,7 +459,9 @@ v2 <- panelview(log_transport_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+          background = "white", 
+          xlab = "", 
+          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 system.time(
@@ -489,7 +501,7 @@ treatment_status_transport <- v1 + v2 + plot_layout(guides = "collect", byrow = 
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
+ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
 
 ```
 
@@ -525,7 +537,9 @@ v1 <- panelview(log_buildings_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Annex I") +
+          background = "white", 
+          xlab = "Year", 
+          ylab = "Country") + ggtitle("Country Sample: Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -602,7 +616,9 @@ v2 <- panelview(log_buildings_co2 ~ treated, data = data,
           pre.post = TRUE,
           axis.adjust = TRUE,
           cex.axis.y = 4, 
-          background = "white") + ggtitle("Country Sample: Non-Annex I") +
+          background = "white", 
+          xlab = "", 
+          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -652,7 +668,7 @@ treatment_status_buildings <- v1 + v2 + plot_layout(guides = "collect", byrow = 
                                 legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
+ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
 
 ```
 
