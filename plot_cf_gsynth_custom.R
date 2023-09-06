@@ -507,9 +507,9 @@ plot.gsynth <- function(
       p <- p + geom_line(aes(time, ATT), size = 1.2)
       
       ## confidence intervals
-      if (is.null(x$est.att)==FALSE || !(is.null(x$est.ind)&length(id) == 1)) {
-        p <- p + geom_ribbon(aes(x = time, ymin=CI.lower, ymax=CI.upper),alpha=0.2)
-      }
+      #if (is.null(x$est.att)==FALSE || !(is.null(x$est.ind)&length(id) == 1)) {
+      #  p <- p + geom_ribbon(aes(x = time, ymin=CI.lower, ymax=CI.upper),alpha=0.2)
+      #}
       
       ## title
       if (is.null(main) == TRUE) {

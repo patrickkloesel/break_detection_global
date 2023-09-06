@@ -34,7 +34,7 @@ source(".\\plot_cf_gsynth_custom.R")
 elec_ac1 <- readRDS(".\\model_outputs\\gsynth_electricity_ac1_output.RDS")
 
 # Combine plots
-p1 <- plot(elec_ac1, type = "gap", id = "United Kingdom", main = "")
+p1 <- plot(elec_ac1, type = "gap", id = "United Kingdom", main = "", shade.post = FALSE)
 p2 <- plot(elec_ac1, type = "ct", id = "United Kingdom", main = "") + geom_vline(aes(xintercept=2016), colour = "#AAAAAA70", size = 2, linetype = "solid") # add second break: 2016
 
 combined_uk <- p1 + p2 + plot_layout(guides = "collect") + 
@@ -108,7 +108,7 @@ combined_elec_ac1 <- ggarrange(combined_uk,
 
 combined_elec_ac1
 
-ggsave(".\\figures\\combined_elec_ac1.jpg", plot = combined_elec_ac1, device = "jpg", width = 15, height = 25)
+ggsave(".\\figures\\combined_elec_ac1.pdf", plot = combined_elec_ac1, device = "pdf", width = 15, height = 25)
 
 ```
 
@@ -139,8 +139,7 @@ combined_colombia <- p1 + p2 + plot_layout(guides = "collect") +
                   theme = theme(plot.title = element_text(size = 18))) & 
   theme(text = element_text('sans')) & 
   theme(plot.title = element_text(face = "bold")) & 
-  theme(plot.title.position = "panel") &
-  theme(legend.position = "bottom")
+  theme(plot.title.position = "panel")
 
 ```
 
@@ -154,7 +153,7 @@ combined_elec_ac6 <- ggarrange(combined_brazil,
 
 combined_elec_ac6
 
-ggsave(".\\figures\\combined_elec_ac6.jpg", plot = combined_elec_ac6, device = "jpg", width = 15, height = 10)
+ggsave(".\\figures\\combined_elec_ac6.pdf", plot = combined_elec_ac6, device = "pdf", width = 15, height = 10)
 ```
 
 # Industry AC1 
@@ -260,7 +259,7 @@ combined_industry_ac1 <- ggarrange(combined_bulgaria,
 
 combined_industry_ac1
 
-ggsave(".\\figures\\combined_industry_ac1.jpg", plot = combined_industry_ac1, device = "jpg", width = 15, height = 25)
+ggsave(".\\figures\\combined_industry_ac1.pdf", plot = combined_industry_ac1, device = "pdf", width = 15, height = 25)
 ```
 
 
@@ -314,7 +313,7 @@ combined_industry_ac6 <- ggarrange(combined_china,
 
 combined_industry_ac6
 
-ggsave(".\\figures\\combined_industry_ac6.jpg", plot = combined_industry_ac6, device = "jpg", width = 15, height = 15)
+ggsave(".\\figures\\combined_industry_ac6.pdf", plot = combined_industry_ac6, device = "pdf", width = 15, height = 15)
 
 ```
 
@@ -466,7 +465,7 @@ combined_transport_ac1 <- ggarrange(combined_austria,
 
 combined_transport_ac1
 
-ggsave(".\\figures\\combined_transport_ac1.jpg", plot = combined_transport_ac1, device = "jpg", width = 15, height = 30)
+ggsave(".\\figures\\combined_transport_ac1.pdf", plot = combined_transport_ac1, device = "pdf", width = 15, height = 30)
 
 ```
 
@@ -519,7 +518,7 @@ combined_transport_ac6 <- ggarrange(combined_colombia,
 
 combined_transport_ac6
 
-ggsave(".\\figures\\combined_transport_ac6.jpg", plot = combined_transport_ac6, device = "jpg", width = 15, height = 15)
+ggsave(".\\figures\\combined_transport_ac6.pdf", plot = combined_transport_ac6, device = "pdf", width = 15, height = 15)
 
 
 ```
@@ -650,7 +649,7 @@ combined_building_ac1 <- ggarrange(combined_australia,
 
 combined_building_ac1
 
-ggsave(".\\figures\\combined_building_ac1.jpg", plot = combined_building_ac1, device = "jpg", width = 15, height = 25)
+ggsave(".\\figures\\combined_building_ac1.pdf", plot = combined_building_ac1, device = "pdf", width = 15, height = 25)
 
 ```
 
@@ -743,7 +742,7 @@ combined_building_ac6 <- ggarrange(combined_arg,
 
 combined_building_ac6
 
-ggsave(".\\figures\\combined_building_ac6.jpg", plot = combined_building_ac6, device = "jpg", width = 15, height = 20)
+ggsave(".\\figures\\combined_building_ac6.pdf", plot = combined_building_ac6, device = "pdf", width = 15, height = 20)
 
 
 ```
