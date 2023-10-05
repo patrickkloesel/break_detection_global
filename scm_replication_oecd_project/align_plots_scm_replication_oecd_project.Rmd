@@ -228,8 +228,16 @@ combined_italy <- p1 + p2 + plot_layout(guides = "collect") +
   theme(plot.title = element_text(face = "bold")) & 
   theme(plot.title.position = "panel")
 
-#plot(ind_ac1, type = "gap", id = "New Zealand", main = "New Zealand 2005 (I)")
-#plot(ind_ac1, type = "ct", id = "New Zealand", main = "New Zealand 2005 (I)")
+####
+p1 <- plot(ind_ac1, type = "gap", id = "New Zealand", main = "", legendOff = T)
+p2 <- plot(ind_ac1, type = "ct", id = "New Zealand", main = "", legendOff = T)
+
+combined_nz <- p1 + p2 + plot_layout(guides = "collect") + 
+  plot_annotation(title = 'New Zealand 2005 (I)',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(text = element_text('sans')) & 
+  theme(plot.title = element_text(face = "bold")) & 
+  theme(plot.title.position = "panel")
 
 ####
 p1 <- plot(ind_ac1, type = "gap", id = "Romania", main = "", legendOff = T)
@@ -244,7 +252,7 @@ combined_romania <- p1 + p2 + plot_layout(guides = "collect") +
 
 ```
 
-```{r industry-ac1-aligned, echo=FALSE, fig.width=15, fig.height=20}
+```{r industry-ac1-aligned, echo=FALSE, fig.width=15, fig.height=28}
 # Aligned plots
 
 combined_industry_ac1 <- ggarrange(combined_bulgaria,
@@ -253,13 +261,14 @@ combined_industry_ac1 <- ggarrange(combined_bulgaria,
           combined_france,
           combined_ireland,
           combined_italy,
+          combined_nz,
           combined_romania,
-          nrow = 7,
+          nrow = 8,
           ncol = 1) 
 
 combined_industry_ac1
 
-ggsave(".\\figures\\combined_industry_ac1.pdf", plot = combined_industry_ac1, device = "pdf", width = 15, height = 25)
+ggsave(".\\figures\\combined_industry_ac1.pdf", plot = combined_industry_ac1, device = "pdf", width = 15, height = 28)
 ```
 
 

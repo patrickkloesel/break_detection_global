@@ -216,7 +216,7 @@ data$treated <- ifelse(data$country == "France" & data$year >= 2017, 1, data$tre
 data$treated <- ifelse(data$country == "Ireland" & data$year >= 2009, 1, data$treated)
 data$treated <- ifelse(data$country == "Italy" & data$year >= 2013, 1, data$treated)
 #data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2003, 1, data$treated)
-#data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2005, 1, data$treated)
 data$treated <- ifelse(data$country == "Romania" & data$year >= 2009, 1, data$treated)
 
 # Check Treatments
@@ -244,7 +244,7 @@ system.time(
                 parallel = FALSE, estimator = "ife")
 )
 
-#saveRDS(out, file = ".\\gsynth_industry_ac1_output.RDS")
+saveRDS(out, file = ".\\model_outputs\\gsynth_industry_ac1_output.RDS")
 
 ```
 
@@ -275,13 +275,14 @@ plot(out, type = "gap", id = "Italy", main = "Italy 2013 (I)")
 plot(out, type = "ct", id = "Italy", main = "Italy 2013 (I)")
 
 
-#plot(out, type = "gap", id = "New Zealand", main = "New Zealand 2005 (I)")
-#plot(out, type = "ct", id = "New Zealand", main = "New Zealand 2005 (I)")
+plot(out, type = "gap", id = "New Zealand", main = "New Zealand 2005 (I)")
+plot(out, type = "ct", id = "New Zealand", main = "New Zealand 2005 (I)")
 
 
 plot(out, type = "gap", id = "Romania", main = "Romania 2009 (I)")
 plot(out, type = "ct", id = "Romania", main = "Romania 2009 (I)")
 ```
+
 ## AC6
 
 ```{r industry-ac6-mod, cache=TRUE}
