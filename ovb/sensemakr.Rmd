@@ -1,0 +1,575 @@
+---
+title: "Sensemakr OECD Project"
+output:
+  html_document: default
+pdf_document: default
+date: "2023-06-19"
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Author: Patrick Klösel (patrick.kloesel@pik-potsdam.de)
+
+Date:   19/06/2023
+
+Task:   Check for unobserved confounders using sensemakr (Cinelli et al.)
+
+```{r, echo = FALSE}
+#install.packages("sensemakr")
+library(sensemakr)
+library(ggplot2)
+library(tidyverse)
+#library(panelView)
+#library(plm)
+data <- read_rds(".//ghg_co2_manual_edgar_final_ets_dummies_updated_fixed.RDS")
+```
+
+
+```{r, echo = FALSE}
+# Define The Two Samples
+AC1 <- c("Australia", "Austria", "Belgium", "Bulgaria", "Canada", "Croatia",        
+         "Czech Republic" , "Denmark", "Estonia" ,"Finland","France", "Germany",        
+         "Greece", "Hungary","Iceland","Ireland", "Italy","Japan" ,         
+         "Latvia","Lithuania", "Luxembourg","Malta","Netherlands","New Zealand",
+         "Norway","Poland","Portugal","Romania", "Slovak Republic", "Slovenia"  ,
+         "Spain","Sweden","Switzerland","United Kingdom" , "United States")  
+AC6 <- c("Argentina","Brazil","Chile","Colombia","China","Costa Rica","India",
+         "Indonesia","Mexico","Peru","Russia","Saudi Arabia","South Africa",
+         "South Korea","Turkey") 
+
+# take out year and country fixed effects
+data$log_electricity_heat_co2R <- lm(data$log_electricity_heat_co2~data$year+data$country)$res
+data$log_transport_co2R <- lm(data$log_transport_co2~data$year+data$country)$res
+data$log_buildings_co2R <- lm(data$log_buildings_co2~data$year+data$country)$res
+data$log_industry_co2R <- lm(data$log_industry_co2~data$year+data$country)$res
+#data$treatedR <- lm(data$treated~data$year+data$country)$res
+data$hddR <- lm(data$hdd~data$year+data$country)$res
+data$cddR <- lm(data$cdd~data$year+data$country)$res
+data$lgdpR <- lm(data$lgdp~data$year+data$country)$res
+data$lpopR <- lm(data$lpop~data$year+data$country)$res
+data$lgdp_sqR <- lm(data$lgdp_sq~data$year+data$country)$res
+
+
+# Restrict Time Series to 2000-2021 and to AC1
+data %>% subset(country  %in%  AC1) %>% subset(year >= 2000) -> ac1
+# Restrict Time Series to 2000-2021 and to AC6
+data %>% subset(country  %in%  AC6) %>% subset(year >= 2000) -> ac6
+```
+
+## Electricity Sector
+
+## AC1
+
+
+```{r, echo = FALSE}
+##
+## ELECTRICITY
+##
+
+##
+## AC1
+##
+
+
+data <- ac1
+
+# Create Staggered SCM Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "United Kingdom" & data$year >= 2015, 1, data$treated)
+#data$treated <- ifelse(data$country == "United Kingdom" & data$year >= 2016, 1, data$treated)
+data$treated <- ifelse(data$country == "Sweden" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "Portugal" & data$year >= 2019, 1, data$treated)
+data$treated <- ifelse(data$country == "Norway" & data$year >= 2012, 1, data$treated)
+data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2009, 1, data$treated)
+#data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2014, 1, data$treated)
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+# Check Treatments
+#panelview(electricity_heat_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+
+
+# run linear model with Rs
+lm_electricityR <- lm(log_electricity_heat_co2R ~ treatedR 
+                     + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                     + ETS_E_2005 + ETS_E_2018
+                     ,
+                     data = data)
+
+summary(lm_electricityR)
+
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_electricityR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR","ETS_E_2005","ETS_E_2018"),
+                         
+                         kd = 3,
+                         ky = 3)
+#sensitivity
+#summary(sensitivity)
+plot(sensitivity)
+#ovb_minimal_reporting(sensitivity)
+
+# Opening the graphical device
+pdf("elec_ac1.pdf",
+    width = 6, height = 4)
+
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+
+```
+
+## AC6
+
+```{r, echo = FALSE}
+##
+## AC6
+##
+
+data <- ac6
+
+# Create Staggered SCM Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "Brazil" & data$year >= 2016, 1, data$treated)
+#data$treated <- ifelse(data$country == "Colombia" & data$year >= 2004, 1, data$treated)
+data$treated <- ifelse(data$country == "Colombia" & data$year >= 2011, 1, data$treated)
+
+# Check Treatments
+#panelview(log_electricity_heat_co2 ~ treated, data = data,  
+#          index = c("country","year"), 
+ #         pre.post = TRUE,
+  #        axis.adjust = TRUE,
+   #       cex.axis.y = 4) 
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_electricityR <- lm(log_electricity_heat_co2R ~ treatedR 
+                      + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                      #+ ETS_E_2005 + ETS_E_2018
+                      ,
+                      data = data)
+
+summary(lm_electricityR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_electricityR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 5,
+                         ky = 5)
+#sensitivity
+#summary(sensitivity)
+plot(sensitivity) 
+#ovb_minimal_reporting(sensitivity)
+
+# Opening the graphical device
+pdf("elec_ac6.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## Industry Sector
+
+## AC1
+
+
+```{r}
+##
+## INDUSTRY
+##
+
+## AC1
+data <- ac1
+
+# Create Treatment Dummy for Treatment
+data$treated <- 0
+#data$treated <- ifelse(data$country == "Belgium" & data$year >= 2002, 1, 0)
+data$treated <- ifelse(data$country == "Bulgaria" & data$year >= 2008, 1, data$treated)
+#data$treated <- ifelse(data$country == "Bulgaria" & data$year >= 2009, 1, data$treated)
+data$treated <- ifelse(data$country == "Canada" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "Czech Republic" & data$year >= 2010, 1, data$treated)
+data$treated <- ifelse(data$country == "France" & data$year >= 2017, 1, data$treated)
+data$treated <- ifelse(data$country == "Ireland" & data$year >= 2009, 1, data$treated)
+data$treated <- ifelse(data$country == "Italy" & data$year >= 2013, 1, data$treated)
+#data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2003, 1, data$treated)
+#data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "Romania" & data$year >= 2009, 1, data$treated)
+
+# Check Treatments
+#panelview(log_industry_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_industryR <- lm(log_industry_co2R ~ treatedR +
+                        lgdpR + lpopR + lgdp_sqR + hddR + cddR + 
+                        ETS_I_2005 + ETS_I_2018 + 
+                        MEPS_ElectricMotors_2011 + MEPS_ElectricMotors_2015
+                      ,
+                      data = data)
+
+summary(lm_industryR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_industryR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 5,
+                         ky = 5)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("industry_ac1.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## AC6
+
+```{r}
+# AC6
+data <- ac6
+
+# Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "China" & data$year >= 2016, 1, data$treated)
+data$treated <- ifelse(data$country == "Indonesia" & data$year >= 2013, 1, data$treated)
+#data$treated <- ifelse(data$country == "Russia" & data$year >= 2004, 1, data$treated)
+data$treated <- ifelse(data$country == "Saudi Arabia" & data$year >= 2016, 1, data$treated)
+#data$treated <- ifelse(data$country == "South Korea" & data$year >= 2004, 1, data$treated)
+
+# Check Treatments
+#panelview(log_industry_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_industryR <- lm(log_industry_co2R ~ treatedR +
+                     lgdpR + lpopR + lgdp_sqR + hddR + cddR #+ 
+                     #ETS_I_2005 + ETS_I_2018 + 
+                     #MEPS_ElectricMotors_2011 + MEPS_ElectricMotors_2015
+                   ,
+                   data = data)
+
+summary(lm_industryR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_industryR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 2,
+                         ky = 2)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("industry_ac6.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## Transport Sector
+
+## AC1
+
+```{r}
+##
+## TRANSPORT
+##
+
+## AC1
+data <- ac1
+
+# Create Staggered SCM Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "Austria" & data$year >= 2006, 1, data$treated)
+data$treated <- ifelse(data$country == "Denmark" & data$year >= 2020, 1, data$treated)
+#data$treated <- ifelse(data$country == "France" & data$year >= 2004, 1, data$treated)
+#data$treated <- ifelse(data$country == "Germany" & data$year >= 2002, 1, data$treated)
+data$treated <- ifelse(data$country == "Germany" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "Hungary" & data$year >= 2011, 1, data$treated)
+data$treated <- ifelse(data$country == "Ireland" & data$year >= 2015, 1, data$treated)
+#data$treated <- ifelse(data$country == "Ireland" & data$year >= 2020, 1, data$treated)
+data$treated <- ifelse(data$country == "Norway" & data$year >= 2016, 1, data$treated)
+data$treated <- ifelse(data$country == "Poland" & data$year >= 2013, 1, data$treated)
+data$treated <- ifelse(data$country == "Romania" & data$year >= 2005, 1, data$treated)
+#data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2003, 1, data$treated)
+data$treated <- ifelse(data$country == "Spain" & data$year >= 2009, 1, data$treated)
+data$treated <- ifelse(data$country == "Sweden" & data$year >= 2016, 1, data$treated)
+data$treated <- ifelse(data$country == "United States" & data$year >= 2008, 1, data$treated)
+
+# Check Treatments
+#panelview(log_transport_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_transportR <- lm(log_transport_co2R ~ treatedR 
+                   + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                   + MEPS_T_2009
+                   ,
+                   data = data)
+
+summary(lm_transportR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_transportR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 5,
+                         ky = 5)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("transport_ac1.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## AC6
+
+```{r}
+##
+## AC6
+##
+data <- ac6
+
+# Treatments
+data$treated <- 0
+#data$treated <- ifelse(data$country == "Colombia" & data$year >= 2002, 1, data$treated)
+data$treated <- ifelse(data$country == "Colombia" & data$year >= 2008, 1, data$treated)
+data$treated <- ifelse(data$country == "Mexico" & data$year >= 2020, 1, data$treated)
+data$treated <- ifelse(data$country == "South Korea" & data$year >= 2008, 1, data$treated)
+
+# Check Treatments
+#panelview(log_transport_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_transportR <- lm(log_transport_co2R ~ treatedR 
+                   + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                   + MEPS_T_2009
+                   ,
+                   data = data)
+
+summary(lm_transportR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_transportR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 2,
+                         ky = 2)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("transport_ac6.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## Buildings Sector
+
+## AC1
+
+```{r}
+##
+## BUILDINGS
+##
+
+
+##
+## AC1
+##
+
+data <- ac1
+
+# Create Staggered SCM Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "Australia" & data$year >= 2019, 1, data$treated)
+data$treated <- ifelse(data$country == "Czech Republic" & data$year >= 2005, 1, data$treated)
+data$treated <- ifelse(data$country == "Denmark" & data$year >= 2020, 1, data$treated)
+data$treated <- ifelse(data$country == "Greece" & data$year >= 2012, 1, data$treated)
+#data$treated <- ifelse(data$country == "Greece" & data$year >= 2013, 1, data$treated)
+data$treated <- ifelse(data$country == "Ireland" & data$year >= 2015, 1, data$treated)
+#data$treated <- ifelse(data$country == "Ireland" & data$year >= 2020, 1, data$treated)
+data$treated <- ifelse(data$country == "New Zealand" & data$year >= 2018, 1, data$treated)
+data$treated <- ifelse(data$country == "Norway" & data$year >= 2015, 1, data$treated)
+data$treated <- ifelse(data$country == "Poland" & data$year >= 2019, 1, data$treated)
+#data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2001, 1, data$treated)
+#data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2003, 1, data$treated)
+data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2011, 1, data$treated)
+#data$treated <- ifelse(data$country == "Slovak Republic" & data$year >= 2015, 1, data$treated)
+#data$treated <- ifelse(data$country == "Sweden" & data$year >= 2004, 1, data$treated)
+
+# Check Treatments
+#panelview(log_buildings_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_buildingsR <- lm(log_buildings_co2R ~ treatedR 
+                   + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                   + MEPS_T_2009
+                   ,
+                   data = data)
+
+summary(lm_buildingsR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_buildingsR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 5,
+                         ky = 5)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("buildings_ac1.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+```
+
+## AC6
+
+```{r}
+#
+## AC6
+##
+
+data <- ac6
+
+# Treatments
+data$treated <- 0
+data$treated <- ifelse(data$country == "Argentina" & data$year >= 2017, 1, data$treated)
+data$treated <- ifelse(data$country == "China" & data$year >= 2018, 1, data$treated)
+data$treated <- ifelse(data$country == "Colombia" & data$year >= 2013, 1, data$treated)
+#data$treated <- ifelse(data$country == "Peru" & data$year >= 2003, 1, data$treated)
+data$treated <- ifelse(data$country == "Peru" & data$year >= 2006, 1, data$treated)
+data$treated <- ifelse(data$country == "South Africa" & data$year >= 2010, 1, data$treated)
+#data$treated <- ifelse(data$country == "South Africa" & data$year >= 2015, 1, data$treated)
+#data$treated <- ifelse(data$country == "South Africa" & data$year >= 2020, 1, data$treated)
+data$treated <- ifelse(data$country == "Turkey" & data$year >= 2013, 1, data$treated)
+
+
+# Check Treatments
+#panelview(log_buildings_co2 ~ treated, data = data,  
+ #         index = c("country","year"), 
+  #        pre.post = TRUE,
+   #       axis.adjust = TRUE,
+    #      cex.axis.y = 4) 
+
+data$treatedR <- lm(data$treated~data$year+data$country)$res
+
+lm_buildingsR <- lm(log_buildings_co2R ~ treatedR 
+                    + hddR + cddR + lgdpR + lpopR + lgdp_sqR
+                    #+ MEPS_T_2009
+                    ,
+                    data = data)
+
+summary(lm_buildingsR)
+
+# Sensitivity
+sensitivity <- sensemakr(model = lm_buildingsR, treatment = "treatedR",
+                         benchmark_covariates = c("lgdpR","hddR","cddR","lgdpR","lpopR","lgdp_sqR"),
+                         
+                         kd = 3,
+                         ky = 3)
+plot(sensitivity)
+
+# Opening the graphical device
+pdf("buildings_ac6.pdf",
+    width = 6, height = 4)
+
+# Creating a plot
+plot(sensitivity)
+
+# Closing the graphical device
+dev.off()
+
+#dev.set(dev.next())
+while (!is.null(dev.list()))  dev.off()
+
+
+
+```

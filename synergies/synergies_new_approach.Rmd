@@ -1,0 +1,373 @@
+---
+title: "new_synergies"
+author: "Laura Menicacci"
+date: "2023-09-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# libraries
+library('purrr')
+library(dplyr)
+library(readxl)
+library(tidyverse)
+#library(combinat)  # For generating combinations
+library(kableExtra)
+library(gridExtra)
+
+# data
+data <- readRDS(".\\policy_out_filtered.RDS")
+oecd <- read.csv(".\\OECD_data_preprocessed_august_23.csv", sep = ",")
+
+```
+
+# Data preparation 
+
+```{r}
+
+# List of data frames to be joined out of the RDS file
+break_dfs <- list(data[[3]][[1]], data[[3]][[2]], data[[3]][[3]], 
+                  data[[3]][[4]], data[[3]][[5]], data[[3]][[6]], 
+                  data[[3]][[7]], data[[3]][[8]])
+
+# Use Reduce and full_join to join all data frames in the list
+breaks <- Reduce(function(x, y) full_join(x, y), break_dfs)
+
+
+# Do the same for the policies attributed
+policies_2y_dfs <- list(data[[6]][[1]], data[[6]][[2]], data[[6]][[3]], 
+                        data[[6]][[4]], data[[6]][[5]], data[[6]][[6]], 
+                        data[[6]][[7]], data[[6]][[8]])
+
+policies_2y <- Reduce(function(x, y) full_join(x, y), policies_2y_dfs)
+
+# IRL_2018_2022 has one policy/break in buildings in 2019, and 3 in transport between 2019-2021
+# IRL_2013_2017 has one policy/break in buildings in 2015, and 2 in transport between 2014-2017
+# DNK_2018_2022 has one policy/break in buildings in 2019, and 2 in transport in 2018, 2022
+
+policies_2y <- policies_2y %>% 
+  mutate(unique_break_identifier = case_when(Module == "Industry" ~ paste0("I_", unique_break_identifier),
+                                             Module == "Buildings" ~ paste0("B_", unique_break_identifier),
+                                             Module == "Electricity" ~ paste0("E_", unique_break_identifier), 
+                                             Module == "Transport" ~ paste0("T_", unique_break_identifier))) 
+
+policies_2y[67, 3] <- "Congestion Charges" # adjust congestion charge which is spelled differently
+oecd[152, 3] <- "Congestion Charges" # adjust congestion charge which is spelled differently
+
+# add missing USA 2007 MEPS to OECD
+MEPS_USA_2007 <- policies_2y[95,] 
+
+oecd <- bind_rows(oecd, MEPS_USA_2007)
+oecd <- oecd[,1:20]
+
+# check number of breaks is right, should be 56
+length(unique(policies_2y$unique_break_identifier))
+
+```
+
+# Single policies
+
+## Calculate the average effect size for single policies
+
+Found ATE for 13 single policy types out of 44
+
+```{r}
+
+single_policy_breaks <- policies_2y %>%
+  group_by(unique_break_identifier) %>% # Group by unique_break_identifier 
+  summarize(count = n()) %>% # Count number of policy matches
+  filter(count == 1) %>%  # Filter to include only policies with single policy matches
+  pull(unique_break_identifier)
+
+average_effect_sizes <- policies_2y %>%
+  filter(unique_break_identifier %in% single_policy_breaks) %>% # Filter for breaks with one #match
+  select(Module, Policy, coeff, High_income) %>% 
+  group_by(Policy) %>% # Group by policy
+  mutate(average_effect_size = mean(coeff, na.rm = TRUE)) # Calculate the average effect size #for each single policy type
+
+#write.csv(average_effect_sizes, ".\\average_effect_sizes.csv")
+
+#known_effects <- policies_2y %>%
+#  group_by(unique_break_identifier) %>% 
+#  summarize(policy_mixes = paste(Policy, collapse = ","), # Policy mixes
+#            effect_size_mix = unique(coeff, na.rm = TRUE)) %>% # Effect sizes of mixes
+#  left_join(average_effect_sizes, by = c("policy_mixes" = "Policy")) # here we have the avg #effect sizes of single policies together with the known mixes effect
+#
+#write.csv(known_effects, ".\\known_effects.csv")
+
+```
+
+# Retrieve more single effects
+
+Subtract known avg single effects from existing policy mixes to retrieve more average single effects. 
+
+```{r}
+
+#avg_effects_new <- read_csv(".\\average_effect_sizes_updated.csv") # do this manually: retrieved up to a total of 33 single policy types
+
+```
+
+## Ratio of detection/occurrence for single policies
+
+```{r}
+# Count policy introductions and tightenings by type 
+occurrence <- oecd %>% 
+  group_by(Policy) %>% 
+  summarise(total_occurred = n())
+
+# Count how often each policy type is detected (=matched with a break)
+detection <- policies_2y %>% 
+  group_by(Policy) %>%
+  summarise(total_detected = n())
+
+percent_detection <- left_join(detection, occurrence, by = "Policy") %>% 
+  mutate(ratio = total_detected / total_occurred) # TOTAL DETECTION / TOTAL OCCURRENCE 
+```
+
+## Expected effect sizes for single policies
+
+ * ratio = detection of the mix/total occurrence of the mix
+ * avg effect size of mix 
+ * expected = ratio * (avg) effect size
+ 
+```{r}
+expected_effect_size <- left_join(average_effect_sizes, percent_detection, by = "Policy") %>%
+  mutate(expected_effect_size = ratio * average_effect_size)
+
+# sanity check
+table(is.na(expected_effect_size))
+
+#write.csv(expected_effect_size, ".\\expected_effect_size_25_09.csv")
+
+```
+
+## Select all **existing** combinations among the 13 single policy effects (select only breaks that have policy mixes of which we have single effects) from the current policy mixes: these are the ones we can calculate
+
+```{r}
+
+breaks_with_mixes <- policies_2y %>%
+  group_by(unique_break_identifier) %>%
+  filter(n() > 1) %>% # Select breaks matching >1 policies
+  summarize(policy_mixes = paste(Policy, collapse = ","), # Policy mixes
+            detected_effect_size_mix = unique(coeff, na.rm = TRUE)) # Effect sizes of mixes
+
+
+split_policies <- strsplit(breaks_with_mixes$policy_mixes, ',') # Split policy mixes into individual policies
+
+valid_rows <- sapply(split_policies, function(policy_list) all(policy_list %in% expected_effect_size$Policy)) # Check if all policies in each row are present in expected_effect_size$Policy
+
+# check: 
+which(valid_rows == FALSE)
+
+filt_breaks_with_mixes <- breaks_with_mixes[valid_rows, ] # Filter rows in breaks_with_mixes where all policies are valid
+
+```
+
+## 6) Compute expected effect size
+
+```{r}
+
+# for each combination 
+  # sum the total expected effect size for the policy mix 
+
+breaks_copy <- filt_breaks_with_mixes # create copy to avoid overwriting
+breaks_copy$total_expected_effect <- 0  # Initialize the column
+
+for (i in seq_along(breaks_copy$policy_mixes)) {  # for each policy mix 
+  l <- unlist(strsplit(breaks_copy$policy_mixes[i], ","))  # split policy mix
+  for (j in l) { # iterate over list of splitted mixes
+    for (k in seq_along(expected_effect_size$Policy)) { # for each policy in expected_effect_size
+      if (j == expected_effect_size$Policy[k]) { # check if policy is in our single effects df 
+        breaks_copy[i, 4] <- breaks_copy$total_expected_effect[i] + as.numeric(expected_effect_size[k, 6]) # sum expected effects of single policies
+      }
+    }
+  }
+}
+
+```
+
+
+## 7) Compute synergy
+
+```{r}
+# for each row 
+  # total detected effect - total expected effect 
+
+breaks_copy$sinergy_effect <- 0
+
+for (i in seq_along(breaks_copy$policy_mixes)) {
+        # total detected - expected 
+        breaks_copy[i, 5] <- breaks_copy[i, 3] - breaks_copy[i, 4]
+      }
+
+```
+
+## 8) Results
+```{r}
+
+pdf(".\\synergies_v4_25_09.pdf", height=10, width=20)
+grid.table(breaks_copy)
+dev.off()
+
+```
+
+####################################################### 
+# Another approach: try a different policy aggregation 
+
+```{r}
+# Define a mapping of old policy names to new policy names
+# with conditions
+policy_mapping <- data.frame(
+  old_name = c("AirEmissionStandards", "Auction", "BanPhaseOutCoal",
+               "Bans and Phaseouts passenger cars ICE", "Bans and Phaseouts Fossil Fuels Heating",
+               "BuildingEnergyCodes", "Carbon tax", "CarbonTax Buildings",
+               "Congestion Charges", "Emissions trading scheme",
+               "EnergyEfficiencyMandates", "ETS Buildings", "ETS Electricity", "ETS Industry",
+               "Excise Taxes Transport", "Excise Taxes Buildings", "Excise Taxes Electricity",
+               "Investment in Rail Infrastructure", "Fossil Fuel Subsides Buildings", "Fossil Fuel Subsides Industry", "Fossil Fuel Subsides Transport", # Expenditure_RailVersusRoad = Investment in Rail Infrastructure?
+               "Financial support", "Financing mechanism",
+               "Financing Mechanism Buildings", "Financing Mechanism Industry", "FiT", # "FiT"?
+               "Labels_Appliances", "Labels_PassengerCars", "MEPS",
+               "MEPS_Appliances", "MEPS_ElectricMotors", "MEPS_T",
+               "PlanningRenewablesExpansion", "RECs", "Renewable subsidy",
+               "Subsidy", "Taxation"),
+  new_name = c("airpollutionstandard", "subsidy_e", "ban_e", "ban_t",
+               "ban_b", "buildingcode", "taxation_i", "taxation_b",
+               "taxation_t", "taxation_e", "energyefficiency_i",
+               "taxation_b", "taxation_e", "taxation_i", "taxation_t",
+               "taxation_b", "taxation_e", "investment_t",
+               "fuelsubsidyreform_b", "fuelsubsidyreform_i",
+               "fuelsubsidyreform_t", "subsidy_b", "subsidy_i",
+               "subsidy_b", "subsidy_i", "subsidy_e", "label_b",
+               "label_t", "MEPS_t", "MEPS_b", "MEPS_i", "MEPS_t",
+               "planning_e", "renewable_standard", "subsidy_e",
+               "subsidy_b", "taxation_t")
+)
+
+# Function to map old policy names to new policy names with conditions
+map_policy_names <- function(old_name, module) {
+  new_name <- policy_mapping$new_name[policy_mapping$old_name == old_name]
+  if (length(new_name) == 0) {
+    return(old_name)  # If no mapping found, return the original name
+  } else {
+    if (module == "Industry" && new_name == "taxation_i") {
+      return("taxation_i")
+    } else if (module == "Buildings" && new_name == "subsidy_b") {
+      return("subsidy_b")
+    } else {
+      return(new_name)
+    }
+  }
+}
+
+library('purrr')
+# Apply the mapping function to the policies_2y DataFrame
+policies_2y_new_mapping <- policies_2y %>%
+  mutate(Policy = map2_chr(Policy, Module, map_policy_names))
+
+# Apply also to the OECD data
+
+oecd_new_mapping <- oecd %>% 
+    mutate(Policy = map2_chr(Policy, Module, map_policy_names))
+
+```
+
+## Avg effect sizes
+
+```{r}
+single_policy_breaks_nm <- policies_2y_new_mapping %>%
+  group_by(unique_break_identifier) %>% # Group by unique_break_identifier 
+  summarize(count = n()) %>% # Count number of policy matches
+  filter(count == 1) %>%  # Filter to include only policies with single policy matches
+  pull(unique_break_identifier)
+
+average_effect_sizes_nm <- policies_2y_new_mapping %>%
+  filter(unique_break_identifier %in% single_policy_breaks) %>% # Filter for breaks with one #match
+  group_by(Policy) %>% # Group by policy
+  summarize(average_effect_size = mean(coeff, na.rm = TRUE)) # Calculate the average effect size #for each single policy type
+```
+
+
+# Another approach: add potential other priors????
+
+From Patrick's suggestion --> "based on the policy mixes computable solely from the observed single y_i (i= 1,...13)", to also compute an *expected synergy effect* s" across those mixes, and substract it in the calculation above. 
+
+first question: are there any policy mixes computable solely from the observed single y_i ? YES, 2. 
+
+POTENTIAL ADDITIONAL INDICATORS TO THE RATIO COLUMN:
+ - prior by sector
+ - prior by income group
+ - prior by introduction/tightening ???
+
+```{r}
+#### sector 
+detection_by_sector <- policies_2y %>% group_by(Module) %>% summarise(detection_sector = n())
+occurrence_by_sector <- oecd %>% group_by(Module) %>% summarise(occurrence_sector = n())
+
+percent_detection_sector <- left_join(detection_by_sector, occurrence_by_sector, by = "Module") %>% 
+  mutate(ratio_sector = detection_sector / occurrence_sector)
+
+##### income
+detection_by_income_group <- policies_2y %>% group_by(High_income) %>% summarise(detection_income = n())
+occurrence_by_income_group <- oecd %>% group_by(High_income) %>% summarise(occurrence_income = n())
+
+percent_detection_income <- left_join(detection_by_income_group, occurrence_by_income_group, by = "High_income") %>% 
+  mutate(ratio_income_group = detection_income / occurrence_income)
+
+
+```
+
+add ratio of sector to expected_effect_size 
+```{r}
+
+expected_effect_size_sector <- left_join(average_effect_sizes, percent_detection_sector, by = "Module") 
+
+expected_effect_size_sector_ratio <- left_join(expected_effect_size_sector, percent_detection, by = "Policy") 
+
+expected_effect_size_sector_ratio_income <- left_join(expected_effect_size_sector_ratio, percent_detection_income, by = "High_income") %>% 
+  mutate(expected_effect_size = ratio * average_effect_size, 
+         expected_effect_size_sector = ratio_sector * ratio * average_effect_size,          expected_effect_size_sector_income = ratio_income_group *ratio_sector * ratio * average_effect_size)
+
+```
+
+## Expected effect sizes for single policies
+
+ * ratio = detection of the mix/total occurrence of the mix
+ * avg effect size of mix 
+ * expected = ratio * (avg) effect size
+ 
+```{r}
+expected_effect_size <- left_join(average_effect_sizes, percent_detection, by = "Policy") %>%
+  mutate(expected_effect_size = ratio * average_effect_size)
+
+# sanity check
+table(is.na(expected_effect_size))
+
+#write.csv(expected_effect_size, ".\\expected_effect_size_25_09.csv")
+
+```
+
+what is the avg effect of 1 mix vs avg effect of single policy? 
+
+```{r}
+avg_effect_mix <- breaks_with_mixes %>% summarise(avg_effect_mix = mean(detected_effect_size_mix), 
+                                                  median_effect_mix = median(detected_effect_size_mix)) # -0.2189362
+
+avg_effect_single_pol <- average_effect_sizes %>% summarise(avg_effect_single_pol = mean(average_effect_size), 
+                                                            median_effect_single = median(average_effect_size))
+# -0.2199292
+
+```
+
+plot distribution
+
+```{r}
+breaks_with_mixes %>% 
+  ggplot(aes(x=detected_effect_size_mix)) + geom_density()
+
+average_effect_sizes %>% 
+  ggplot(aes(x=average_effect_size)) + geom_density()
+```
+

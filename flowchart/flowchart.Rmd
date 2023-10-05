@@ -1,0 +1,209 @@
+---
+title: "flowchart"
+author: "Laura Menicacci"
+date: "2023-08-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries + data
+
+```{r}
+library(tidyverse)
+library(ggalluvial)
+library(ggfittext)
+
+#new_oecd <- read_csv(".\\OECD_data_preprocessed_august_23.csv", show_col_types = F) # new OECD data. The column "Policytype_detail" has the broader aggregation of policies
+
+match <- read.csv(".\\CAPMF_policies_names_new_oecd_match.csv", sep = ";", ) # a file I created that matches all the policy names across the old and new data set. The column "Broad_category" is the aggregation of policies to policy categories we use in Fig. 4 right now, the column "policy_new" matches the new policy names to the old policy names (in the "policy" column)
+```
+
+
+# create flowchart
+
+```{r, fig.height=10, fig.width=10}
+#c_filt <- c %>% 
+#  filter(!(Note == "excluded")) %>% # remove so i only have the 4 sectors
+#  mutate(Broad.Category = if_else(Broad.Category %in% "", "RDD", Broad.Category))
+#
+#for (i in 1:nrow(c_filt)){
+#  if (grepl("Taxation", c_filt[i, 3], ignore.case = T) & c_filt[i, 4] == ""){ 
+#    c_filt[i,4] = "Taxation"}
+#  if (grepl("Subsidy", c_filt[i, 3], ignore.case = T) & c_filt[i, 4] == ""){ 
+#    c_filt[i,4] = "Subsidy"}
+#  if (grepl("Planning", c_filt[i, 3], ignore.case = T) & c_filt[i, 4] == ""){ 
+#    c_filt[i,4] = "Other regulatory instruments"}
+#  if (grepl("Minimum energy performance standard", c_filt[i, 3], ignore.case = T) & c_filt[i, #4] == ""){ 
+#    c_filt[i,4] = "Performance Standards"}
+#}
+
+c_filt2 <- c_filt %>% select(Module, Broad.Category, Policytype_detail_new) #%>% group_by(Module)
+
+c_filt2$count <- 1
+c3 <- aggregate(count ~ ., c_filt2, FUN = sum)
+  
+flow <- c3 %>%   
+ ggplot(aes(axis1 = Broad.Category, axis2 = Policytype_detail_new, y = count)) +
+ geom_alluvium(aes(fill = Policytype_detail_new)) +
+ geom_stratum() +
+ geom_text(stat = "stratum",
+           aes(label = after_stat(stratum))) +
+# facet_wrap(~ Module) +
+ scale_fill_viridis_d() +  
+ theme_void() + 
+  theme(legend.position = "bottom")
+
+flow
+
+ggsave(".\\flowchart_try.pdf", plot = flow, device = "pdf", width = 10, height = 10)
+
+
+```
+### flowchaert 04-09-23
+
+```{r}
+match <- read.csv(".\\CAPMF_policies_names_new_oecd_match.csv", sep = ";") # Could you make a figure or table overview of which policies are assigned to which category for the SI? Sometimes policies are duplicated in a category because we have them in the main data set and in our add-on data, they do not need to be duplicated in the table
+```
+
+# by sector: Buildings
+
+```{r, fig.height=10, fig.width=10}
+
+c <- match %>% 
+  filter(Module %in% c("Buildings")) %>% 
+  select(Policy_name_fig_1, Cluster_categories) %>% 
+  mutate(Policy_name_fig_1 = factor(Policy_name_fig_1, levels = c("Label (appliances)", "Carbon tax","Emission trading scheme", "Fossil fuel subsidy reform", "Fuel tax", "Ban & phase out (fossil heatings)", "Building code", "Performance standard (appliances)", "Financing mechanism", "Subsidy scheme")))  # adjust the level order for later plotting
+
+c$count <- 1
+cb <- aggregate(count ~ ., c, FUN = sum)
+
+#is_alluvia_form(cb)
+
+buildings <- cb %>%   
+ ggplot(aes(axis1 = Policy_name_fig_1, axis2 = Cluster_categories, y = count)) +
+ geom_flow(stat = "alluvium", aes(fill = Cluster_categories)) +
+ geom_stratum(width = 0.45) +
+ geom_text(stat = "stratum",
+           aes(label = after_stat(stratum)), 
+           size = 3.5) + 
+ scale_fill_viridis_d(name = "Clustered policy categories", breaks=c('Information','Pricing','Regulation','Subsidy')) +  
+ theme_void() + 
+ theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+ggtitle("Buildings") 
+
+buildings
+#ggsave(".\\flowchart_v2.pdf", plot = flow, device = "pdf", width = 10, height = 10)
+
+
+```
+
+# Transport
+
+```{r , fig.height=10, fig.width=10}
+c <- match %>% 
+  filter(Module %in% c("Transport")) %>% 
+  select(Policy_name_fig_1, Cluster_categories) %>% 
+  mutate(Policy_name_fig_1 = factor(Policy_name_fig_1, levels = c("Label (cars)", "Carbon tax","Emission trading scheme", "Fossil fuel subsidy reform", "Fuel tax", "Road toll", "Vehicle tax (cars)", "Ban & phase out (fossil cars)", "Performance standard (cars & trucks)", "Speed limit", "Public expenditure for rail", "Subsidy (cars)")))  # adjust the level order for later plotting
+
+c$count <- 1
+ct <- aggregate(count ~ ., c, FUN = sum)
+
+#is_alluvia_form(cb)
+
+transport <- ct %>%   
+ ggplot(aes(axis1 = Policy_name_fig_1, axis2 = Cluster_categories, y = count)) +
+ geom_flow(stat = "alluvium", aes(fill = Cluster_categories)) +
+ geom_stratum(width = 0.45) +
+ geom_text(stat = "stratum",
+           aes(label = after_stat(stratum)), 
+           size = 3.5) + 
+ scale_fill_viridis_d(name = "Clustered policy categories", breaks=c('Information','Pricing','Regulation','Subsidy')) +  
+ theme_void() + 
+ theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+ggtitle("Transport")
+
+transport
+
+```
+# Industry 
+
+```{r, fig.height=10, fig.width=10}
+
+c <- match %>% 
+  filter(Module %in% c("Industry")) %>% 
+  select(Policy_name_fig_1, Cluster_categories) %>% 
+  mutate(Policy_name_fig_1 = factor(Policy_name_fig_1, levels = c("Carbon tax","Emission trading scheme", "Fossil fuel subsidy reform", "Fuel tax", "Energy efficiency mandate", "Performance standard (electric motors)", "Financing mechanism")))  # adjust the level order for later plotting
+
+c$count <- 1
+ci <- aggregate(count ~ ., c, FUN = sum)
+
+#is_alluvia_form(cb)
+
+industry <- ci %>%   
+ ggplot(aes(axis1 = Policy_name_fig_1, axis2 = Cluster_categories, y = count)) +
+ geom_flow(stat = "alluvium", aes(fill = Cluster_categories)) +
+ geom_stratum(width = 0.45) +
+ geom_text(stat = "stratum",
+           aes(label = after_stat(stratum)), 
+           size = 3.5) + 
+ scale_fill_viridis_d(name = "Clustered policy categories", breaks=c('Information','Pricing','Regulation','Subsidy')) +  
+ theme_void() + 
+ theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+ggtitle("Industry")
+
+industry
+
+```
+# Electricity
+
+```{r, fig.height=10, fig.width=10}
+
+c <- match %>% 
+  filter(Module %in% c("Electricity")) %>% 
+  select(Policy_name_fig_1, Cluster_categories) %>% 
+  mutate(Policy_name_fig_1 = factor(Policy_name_fig_1, levels = c("Carbon tax","Emission trading scheme", "Fossil fuel subsidy reform", "Fuel tax", "Air pollution standard", "Ban & phase out (coal plants)", "Renewable expansion planning", "Renewable portfolio standard", "Renewable auction", "Renewable feed in tariff")))  # adjust the level order for later plotting
+
+c$count <- 1
+ce <- aggregate(count ~ ., c, FUN = sum)
+
+#is_alluvia_form(cb)
+
+electricity <- ce %>%   
+ ggplot(aes(axis1 = Policy_name_fig_1, axis2 = Cluster_categories, y = count)) +
+ geom_flow(stat = "alluvium", aes(fill = Cluster_categories)) +
+ geom_stratum(width = 0.45) +
+ geom_text(stat = "stratum",
+           aes(label = after_stat(stratum)), 
+           size = 3.5) + 
+ scale_fill_viridis_d(name = "Clustered policy categories", breaks=c('Information','Pricing','Regulation','Subsidy')) +  
+ theme_void() + 
+ theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+ggtitle("Electricity")
+
+electricity
+
+```
+# merge plots together
+
+```{r, fig.height=10, fig.width=17}
+library(cowplot)
+library(patchwork)
+library(ggpubr)
+
+legend_b <- get_legend(
+  transport + 
+    guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom")
+)
+
+all <- plot_grid(buildings, electricity, industry, transport, align = "v", ncol = 2, nrow = 2) 
+
+all_sectors_f <- plot_grid(all, legend_b, ncol = 1, rel_heights = c(1, .1))
+
+ggsave(".\\flowchart_v3.pdf", plot = all_sectors_f, device = "pdf", width = 17, height = 10)
+
+```
+
