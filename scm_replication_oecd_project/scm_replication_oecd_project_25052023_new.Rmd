@@ -81,11 +81,11 @@ v1 <- panelview(electricity_heat_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
           cex.legend = 8, 
           background = "white", 
-          xlab = "Year", 
-          ylab = "Country") + ggtitle("Country Sample: Annex I") +
+          xlab = "", 
+          ylab = "") + ggtitle("Developed Countries") +
   theme(plot.title = element_text(size = 12))
 
 
@@ -149,11 +149,11 @@ v2 <- panelview(log_electricity_heat_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
           cex.legend = 8, 
           background = "white", 
-          xlab = "", 
-          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
+          xlab = "Year", 
+          ylab = "") + ggtitle("Developing Countries") +
   theme(plot.title = element_text(size = 12))
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -185,14 +185,23 @@ plot(out, type = "ct", id = "Colombia", main = "Colombia 2011 (E)") #+ geom_vlin
 
 ```
 
-```{r combine-elec, echo=FALSE, include=FALSE}
+```{r combine-elec, echo=FALSE, include=FALSE, fig.height=10, fig.width=10}
 
-treatment_status_elec <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Electricity',
-                  theme = theme(plot.title = element_text(size = 16), 
-                                legend.position = "bottom", 
+# Create the patchwork, dropping the y-axis labels from the plots, and setting
+# the margins
+treatment_status_elec <- v1 / v2 + plot_layout(guides = "collect", byrow = F) + plot_annotation(
+                  theme = theme(legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_elec.jpg", plot = treatment_status_elec, device = "jpg", width = 10, height = 5)
+# Use the tag label as a y-axis label
+treatment_status_elec_wrap <- wrap_elements(treatment_status_elec) +
+  labs(tag = "Country") +
+  theme(
+    plot.tag = element_text(size = rel(1.2), angle = 90),
+    plot.tag.position = "left"
+  )
+
+ggsave(".\\figures\\treatment_status_elec.pdf", plot = treatment_status_elec_wrap, device = "pdf", width = 10, height = 10)
 
 ```
 
@@ -224,10 +233,11 @@ v1 <- panelview(log_industry_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
+          cex.legend = 8,
           background = "white", 
-          xlab = "Year", 
-          ylab = "Country") + ggtitle("Country Sample: Annex I") +
+          xlab = "", 
+          ylab = "") + ggtitle("Developed Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -302,10 +312,11 @@ v2 <- panelview(log_industry_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
+          cex.legend = 8,
           background = "white", 
-          xlab = "", 
-          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
+          xlab = "Year", 
+          ylab = "") + ggtitle("Developing Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 system.time(
@@ -340,12 +351,19 @@ plot(out, type = "ct", id = "Saudi Arabia", main = "Saudi Arabia 2016 (I)")
 
 ```{r combine-industry, echo=FALSE, include=FALSE}
 
-treatment_status_industry <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Industry',
-                  theme = theme(plot.title = element_text(size = 16), 
-                                legend.position = "bottom", 
-                                legend.text=element_text(size=12)))
+# Create the patchwork, dropping the y-axis labels from the plots, and setting
+# the margins
+treatment_status_industry <- v1 / v2 + plot_layout(guides = "collect", byrow = F) + plot_annotation(theme = theme(legend.position = "bottom", 
+                              legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_industry.jpg", plot = treatment_status_industry, device = "jpg", width = 10, height = 5)
+# Use the tag label as a y-axis label
+treatment_status_industry_wrap <- wrap_elements(treatment_status_industry) +
+  labs(tag = "Country") +
+  theme(plot.tag = element_text(size = rel(1.2), angle = 90),
+    plot.tag.position = "left"
+  )
+
+ggsave(".\\figures\\treatment_status_industry.pdf", plot = treatment_status_industry_wrap, device = "pdf", width = 10, height = 10)
 
 ```
 
@@ -380,10 +398,11 @@ v1 <- panelview(log_transport_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
+          cex.legend = 8,
           background = "white", 
-          xlab = "Year", 
-          ylab = "Country") + ggtitle("Country Sample: Annex I") +
+          xlab = "", 
+          ylab = "") + ggtitle("Developed Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -459,10 +478,11 @@ v2 <- panelview(log_transport_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
+          cex.legend = 8,
           background = "white", 
-          xlab = "", 
-          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
+          xlab = "Year", 
+          ylab = "") + ggtitle("Developing Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 system.time(
@@ -497,12 +517,20 @@ plot(out, type = "ct", id = "South Korea", main = "South Korea 2008 (T)")
 
 ```{r combine-transport, echo=FALSE, include=FALSE}
 
-treatment_status_transport <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Transport',
-                  theme = theme(plot.title = element_text(size = 16), 
-                                legend.position = "bottom", 
+# Create the patchwork, dropping the y-axis labels from the plots, and setting
+# the margins
+treatment_status_transport <- v1 / v2 + plot_layout(guides = "collect", byrow = F) + plot_annotation(theme = theme(legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_transport.jpg", plot = treatment_status_transport, device = "jpg", width = 10, height = 5)
+# Use the tag label as a y-axis label
+treatment_status_transport_wrap <- wrap_elements(treatment_status_transport) +
+  labs(tag = "Country") +
+  theme(
+    plot.tag = element_text(size = rel(1.2), angle = 90),
+    plot.tag.position = "left"
+  )
+
+ggsave(".\\figures\\treatment_status_transport.pdf", plot = treatment_status_transport_wrap, device = "pdf", width = 10, height = 10)
 
 ```
 
@@ -537,10 +565,11 @@ v1 <- panelview(log_buildings_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8, 
+          cex.legend = 8,
           background = "white", 
-          xlab = "Year", 
-          ylab = "Country") + ggtitle("Country Sample: Annex I") +
+          xlab = "", 
+          ylab = "") + ggtitle("Developed Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -616,10 +645,11 @@ v2 <- panelview(log_buildings_co2 ~ treated, data = data,
           index = c("country","year"), 
           pre.post = TRUE,
           axis.adjust = TRUE,
-          cex.axis.y = 4, 
+          cex.axis.y = 8,
+          cex.legend = 8,
           background = "white", 
-          xlab = "", 
-          ylab = "") + ggtitle("Country Sample: Non-Annex I") +
+          xlab = "Year", 
+          ylab = "") + ggtitle("Developing Countries") +
   theme(plot.title = element_text(size = 12)) 
 
 # Run Gsynth with Staggered Treatments (IFE)
@@ -663,13 +693,20 @@ plot(out, type = "ct", id = "Turkey", main = "Turkey 2013 (B)")
 
 
 ```{r combine-buildings, echo=FALSE, include=FALSE}
-
-treatment_status_buildings <- v1 + v2 + plot_layout(guides = "collect", byrow = F, widths = c(12, 12)) + plot_annotation(title = 'Sector Buildings',
-                  theme = theme(plot.title = element_text(size = 16), 
-                                legend.position = "bottom", 
+# Create the patchwork, dropping the y-axis labels from the plots, and setting
+# the margins
+treatment_status_buildings <- v1 / v2 + plot_layout(guides = "collect", byrow = F) + plot_annotation(theme = theme(legend.position = "bottom", 
                                 legend.text=element_text(size=12)))
 
-#ggsave(".\\figures\\treatment_status_buildings.jpg", plot = treatment_status_buildings, device = "jpg", width = 10, height = 5)
+# Use the tag label as a y-axis label
+treatment_status_buildings_wrap <- wrap_elements(treatment_status_buildings) +
+  labs(tag = "Country") +
+  theme(
+    plot.tag = element_text(size = rel(1.2), angle = 90),
+    plot.tag.position = "left"
+  )
+
+ggsave(".\\figures\\treatment_status_buildings.pdf", plot = treatment_status_buildings_wrap, device = "pdf", width = 10, height = 10)
 
 ```
 
